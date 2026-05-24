@@ -3,7 +3,7 @@
 Asignatura: Robótica y Sistemas Autónomos (ICI 4150)
 Integrantes: (completar)
 
-## 1. ** bjetivo**
+## 1. **Objetivo**
 Implementar un sistema de navegación reactiva para un robot móvil diferencial
 en Webots, usando sensores de distancia y encoders de rueda, aplicando filtrado
 sobre las mediciones y un filtro de Kalman para estimar la distancia frontal a
