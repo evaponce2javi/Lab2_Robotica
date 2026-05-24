@@ -1,6 +1,8 @@
 # Controlador para el robot E-puck (Webots)
 # Laboratorio 2 de ICI4150-2 - Robotica y Sistemas Autónomos
 
+import csv
+from collections import deque
 from controller import Robot
 from typing import Tuple
 
@@ -42,8 +44,15 @@ SENSOR_DETECTION_THRESHOLD = 80.0   # raw por debajo de esto => sin obstaculo en
 # velocidades y umbrales de navegacion
 VEL_CRUCERO     = 5.0
 VEL_EVASION     = 2.0
-UMBRAL_ALERTA   = 0.25   # distancia kalman desde la que se activa la evasion
+UMBRAL_BAJO     = 0.20   # por debajo de este umbral se ENTRA en evasion
+UMBRAL_ALTO     = 0.30   # por encima de este umbral se SALE de evasion
 MARGEN_SIMETRIA = 0.75   # diferencia laser izq/der bajo la cual el peligro es frontal puro
+
+# filtro de media movil sobre la medicion laser antes de alimentar al kalman
+MA_WINDOW       = 5
+
+# registro de datos para graficos posteriores
+CSV_FILENAME    = 'registro.csv'
 
 # filtro de kalman:
 #   Q bajo => confiamos bastante en el modelo cinematico de los encoders
@@ -178,11 +187,41 @@ encoders_initialized = False
 
 total_displacement = 0.0
 
+laser_buffer = deque(maxlen=MA_WINDOW)
+modo_evasion = False
+
 kalman = KalmanFilter1D(initial_estimate=LASER_MAX_DIST_M, initial_variance=1.0)
 
 print(f"[*] controlador inicializado => t_s={SAMPLE_TIME_S:.4f}s, f_s={SAMPLE_FREQ_HZ:.2f}hz")
 print(f"[*] IR => rango confiable ~{SENSOR_MAX_DIST_M:.3f}m, umbral raw={SENSOR_DETECTION_THRESHOLD:.1f}")
 print(f"[*] kalman => Q={KALMAN_Q}, R={KALMAN_R}")
+
+# ─── registro CSV ───────────────────────────────────────────────────────────────
+# se abre una vez al inicio; webots cierra el proceso al detener la simulacion,
+# por lo que no hace falta un close() explicito. line_buffering=True asegura
+# que cada fila se escriba al disco inmediatamente.
+
+csv_file   = open(CSV_FILENAME, 'w', newline='', buffering=1)
+csv_writer = csv.writer(csv_file)
+csv_writer.writerow([
+    'tiempo_s',
+    # IR crudos (8 sensores)
+    'ps0_raw', 'ps1_raw', 'ps2_raw', 'ps3_raw',
+    'ps4_raw', 'ps5_raw', 'ps6_raw', 'ps7_raw',
+    # laser frontal
+    'laser_izq_m', 'laser_der_m',
+    # encoders (posicion angular acumulada)
+    'enc_izq_rad', 'enc_der_rad',
+    # desplazamiento del step
+    'delta_d_m', 'total_d_m',
+    # medicion laser: cruda, filtrada (media movil)
+    'z_raw_m', 'z_filtrada_m',
+    # filtro de kalman
+    'kalman_x_m', 'kalman_P', 'kalman_K',
+    # estado de navegacion
+    'modo_evasion',
+])
+print(f"[*] registro CSV => {CSV_FILENAME}")
 
 
 # ─── loop principal ─────────────────────────────────────────────────────────────
@@ -219,15 +258,31 @@ while robot.step(TIMESTEP_MS) != -1:
     front_detected = len(laser_measurements) > 0
 
     if front_detected:
+        z_raw = min(laser_measurements)
+        laser_buffer.append(z_raw)
+        z_filtrada = sum(laser_buffer) / len(laser_buffer)
+
         kalman.predict(delta_displacement)
-        kalman.update(min(laser_measurements))
+        kalman.update(z_filtrada)
     else:
+        laser_buffer.clear()
         kalman.reset_to_no_detection()
 
     distancia_estimada_frontal = kalman.estimate
 
+    # valores para el registro: z_raw y z_filtrada solo existen cuando hay deteccion
+    log_z_raw      = z_raw      if front_detected else ''
+    log_z_filtrada = z_filtrada  if front_detected else ''
+    log_kalman_K   = kalman.p / (kalman.p + KALMAN_R) if front_detected else ''
+
     # 4. navegacion reactiva
-    if distancia_estimada_frontal < UMBRAL_ALERTA:
+    # histeresis: dos umbrales para evitar oscilacion en la frontera
+    if not modo_evasion and distancia_estimada_frontal < UMBRAL_BAJO:
+        modo_evasion = True
+    elif modo_evasion and distancia_estimada_frontal > UMBRAL_ALTO:
+        modo_evasion = False
+
+    if modo_evasion:
         diferencia_laser = abs(dist_izq - dist_der)
 
         if diferencia_laser < MARGEN_SIMETRIA:
@@ -248,7 +303,7 @@ while robot.step(TIMESTEP_MS) != -1:
     # debug periodico cada ~0.5s (8 steps * 64ms)
     step_count = int(robot.getTime() / SAMPLE_TIME_S)
     if step_count % 8 == 0:
-        estado = "peligro" if distancia_estimada_frontal < UMBRAL_ALERTA else "libre"
+        estado = "evasion" if modo_evasion else "libre"
 
         # estado del laser y kalman
         print(
@@ -279,3 +334,27 @@ while robot.step(TIMESTEP_MS) != -1:
                 f"diag_izq={ir_dl_dist:.4f}m({'ok' if ir_dl_det else '--'})  "
                 f"diag_der={ir_dr_dist:.4f}m({'ok' if ir_dr_det else '--'})"
             )
+
+    # 5. registro CSV: una fila por step con todas las senales
+    csv_writer.writerow([
+        f"{robot.getTime():.4f}",
+        # IR crudos
+        f"{raw_values['ps0']:.2f}", f"{raw_values['ps1']:.2f}",
+        f"{raw_values['ps2']:.2f}", f"{raw_values['ps3']:.2f}",
+        f"{raw_values['ps4']:.2f}", f"{raw_values['ps5']:.2f}",
+        f"{raw_values['ps6']:.2f}", f"{raw_values['ps7']:.2f}",
+        # laser
+        f"{dist_izq:.6f}", f"{dist_der:.6f}",
+        # encoders
+        f"{current_encoder_left:.6f}", f"{current_encoder_right:.6f}",
+        # desplazamiento
+        f"{delta_displacement:.6f}", f"{total_displacement:.6f}",
+        # medicion cruda y filtrada (vacias si no hay deteccion)
+        log_z_raw if log_z_raw == '' else f"{log_z_raw:.6f}",
+        log_z_filtrada if log_z_filtrada == '' else f"{log_z_filtrada:.6f}",
+        # kalman
+        f"{kalman.x:.6f}", f"{kalman.p:.8f}",
+        log_kalman_K if log_kalman_K == '' else f"{log_kalman_K:.8f}",
+        # estado
+        1 if modo_evasion else 0,
+    ])

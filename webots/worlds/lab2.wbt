@@ -15,8 +15,8 @@ WorldInfo {
   title "E-puck simulation"
 }
 Viewpoint {
-  orientation -0.4749267024622008 0.2308330707050569 0.8492118232556908 2.205792622953796
-  position 0.7876490677487874 -1.5982859697391745 2.3661102769447466
+  orientation -0.2634857898381806 0.10634832394862473 0.9587832250027472 2.117766434459339
+  position 1.2187593784382735 -2.114283221559302 1.3651814490168863
   follow "e-puck"
 }
 TexturedBackground {
@@ -72,6 +72,11 @@ WoodenBox {
 WoodenBox {
   translation -0.2 -0.68 0.11
   name "wooden box(5)"
+  size 0.2 0.2 0.2
+}
+WoodenBox {
+  translation -0.32 -0.44 0.11
+  name "wooden box(7)"
   size 0.2 0.2 0.2
 }
 WoodenBox {
