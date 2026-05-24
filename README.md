@@ -1,7 +1,7 @@
 # **Laboratorio 2: Navegación reactiva con filtrado y fusión de sensores en Webots**
 
 Asignatura: Robótica y Sistemas Autónomos (ICI 4150)
-Integrantes: (completar)
+Integrantes: Nicolás Fuentes, Eva Ponce, Esteban Schanze, Juan Geraldo
 
 ## 1. **Objetivo**
 Implementar un sistema de navegación reactiva para un robot móvil diferencial
@@ -26,8 +26,8 @@ distancia entre ruedas L = 0.052 m.
 El controlador se ejecuta al basicTimeStep del mundo. Con un paso de
 (completar, p. ej. 32) ms:
 
-- `Ts = ____ s`
-- `fs = 1/Ts = ____ Hz`
+- `Ts = 0.064 s`
+- `fs = 1/Ts = 15.6 Hz`
 - Muestras registradas por experimento: `____`
 
 ## 4. **Análisis de las señales registradas**
@@ -85,6 +85,11 @@ está más cerca por la izquierda, gira a la derecha, y viceversa.
 
 
 ### **Escenario 2 — entorno complejo**
-En la siguiente imagen se puede ver una foto del Escenario creado.
+El segundo escenario presenta múltiples obstáculos y pasillos estrechos para evaluar la robustez de la fusión sensorial.
 
 ![Escenario Complejo](/img/EC.png)
+
+## 10. **Conclusiones**
+
+
+## 11. **Instrucciones de ejecucion**
