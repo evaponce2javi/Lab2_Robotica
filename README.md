@@ -1,15 +1,15 @@
-# ** Laboratorio 2: Navegación reactiva con filtrado y fusión de sensores en Webots **
+# **Laboratorio 2: Navegación reactiva con filtrado y fusión de sensores en Webots**
 
 Asignatura: Robótica y Sistemas Autónomos (ICI 4150)
 Integrantes: (completar)
 
-## 1. ** Objetivo **
+## 1. ** bjetivo**
 Implementar un sistema de navegación reactiva para un robot móvil diferencial
 en Webots, usando sensores de distancia y encoders de rueda, aplicando filtrado
 sobre las mediciones y un filtro de Kalman para estimar la distancia frontal a
 obstáculos.
 
-## 2. ** Robot y sensores utilizados **
+## 2. **Robot y sensores utilizados**
 Se utiliza el robot e-puck de Webots (robot diferencial con dos ruedas
 motrices independientes). Dispositivos empleados:
 
@@ -22,7 +22,7 @@ que entregan el ángulo acumulado de cada rueda en radianes.
 Parámetros físicos del e-puck: radio de rueda r = 0.0205 m,
 distancia entre ruedas L = 0.052 m.
 
-## 3. ** Frecuencia de muestreo **
+## 3. **Frecuencia de muestreo**
 El controlador se ejecuta al basicTimeStep del mundo. Con un paso de
 (completar, p. ej. 32) ms:
 
@@ -30,12 +30,12 @@ El controlador se ejecuta al basicTimeStep del mundo. Con un paso de
 - `fs = 1/Ts = ____ Hz`
 - Muestras registradas por experimento: `____`
 
-## 4. ** Análisis de las señales registradas **
+## 4. **Análisis de las señales registradas**
 El controlador registra en registro.csv las lecturas crudas de los sensores
 IR, los encoders y todas las señales derivadas. (Describir el ruido observado,
 las variaciones y tendencias a partir de fig_crudas.png.)
 
-## 5. ** Estimación del avance mediante encoders **
+## 5. **Estimación del avance mediante encoders**
 El avance lineal entre dos instantes se obtiene de s = r·θ. Para el robot
 completo se promedia el avance de ambas ruedas:
 
@@ -45,12 +45,12 @@ completo se promedia el avance de ambas ruedas:
 
 donde `Δθ` es la diferencia de lectura del encoder entre dos pasos.
 
-## 6. ** Filtro simple aplicado **
+## 6. **Filtro simple aplicado**
 Se aplica una media móvil de WINDOW = 5 muestras sobre la distancia
 frontal. (Comparar la señal cruda y la filtrada con fig_comparacion.png:
 reducción de ruido vs. retardo introducido.)
 
-## 7. ** Filtro de Kalman **
+## 7. **Filtro de Kalman**
 Filtro de Kalman escalar para estimar la distancia frontal d.
 
 **Etapa de predicción** (con encoders):
@@ -71,7 +71,7 @@ P      = (1 − K)·P_pred
 Parámetros usados: `Q = ____`, `R = ____`. *(Justificar la elección y comentar
 el efecto sobre la ganancia `K` observada en `fig_ganancia.png`.)*
 
-## 8. ** Lógica de navegación reactiva **
+## 8. **Lógica de navegación reactiva**
 - Si la distancia estimada `d̂ > SAFE_HIGH` → el robot avanza.
 - Si `d̂ < SAFE_LOW` → el robot gira.
 - Se usan dos umbrales (histéresis) para evitar giros innecesarios cerca del
@@ -79,11 +79,12 @@ límite.
 - La dirección del giro se decide con los sensores laterales: si el obstáculo
 está más cerca por la izquierda, gira a la derecha, y viceversa.
 
-## 9. ** Resultados en los escenarios de prueba **
+## 9. **Resultados en los escenarios de prueba**
+
+### **Escenario 1 — entorno simple**
 
 
+### **Escenario 2 — entorno complejo**
+En la siguiente imagen se puede ver una foto del Escenario creado.
 
-
-
-
-
+![Escenario Complejo](/img/EC.png)
