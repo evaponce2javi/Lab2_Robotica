@@ -18,6 +18,7 @@ los laterales izquierdos ps5/ps6 y los derechos ps1/ps2.
 - Encoders: sensores de posición left wheel sensor y right wheel sensor,
 que entregan el ángulo acumulado de cada rueda en radianes.
 - Motores: left wheel motor y right wheel motor, en modo velocidad.
+- Sensores láser de distancia frontal: Estos dispositivos entregan una medición directa de la distancia hacia obstáculos al frente del robot, constituyendo la fuente principal para la etapa de corrección del filtro.
 
 Parámetros físicos del e-puck: radio de rueda r = 0.0205 m,
 distancia entre ruedas L = 0.052 m.
