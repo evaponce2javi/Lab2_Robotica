@@ -36,7 +36,6 @@ El controlador se ejecuta al `basicTimeStep` del mundo, con un paso de 64 ms:
 
 - Periodo de muestreo: *Tₛ* = 0.064 s
 - Frecuencia de muestreo: *fₛ* = 1 / *Tₛ* ≈ 15.625 Hz
-- Muestras registradas por experimento: `____`
 
 ## 4. **Análisis de las señales registradas**
 El controlador genera automáticamente un archivo `registro.csv` en el
@@ -474,7 +473,7 @@ lo elimina. Las principales oportunidades de mejora identificadas son:
   detectar obstáculos laterales con mayor anticipación y reducir la frecuencia
   de activaciones de evasión en el entorno complejo.
 
-  
+
 ## 11. **Instrucciones de ejecución**
 
 ### Requisitos
