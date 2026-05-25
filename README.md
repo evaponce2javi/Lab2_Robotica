@@ -56,19 +56,6 @@ columnas registradas son:
 Las columnas `z_raw_m`, `z_filtrada_m` y `kalman_K` quedan vacías en los
 pasos donde ningún láser detecta obstáculo.
 
-*(Gráficos por generar a partir de `registro.csv`:)*
-
-- **Señales crudas** — lecturas directas del láser y los sensores IR a lo
-  largo del tiempo, mostrando el nivel de ruido inherente a cada sensor.
-- **Señal filtrada vs. cruda** — comparación de `z_raw_m` y `z_filtrada_m`
-  para evaluar la reducción de ruido y el retardo introducido por la media
-  móvil.
-- **Estimación Kalman** — evolución de `kalman_x_m` superpuesta con la
-  medición filtrada, evidenciando la fusión entre el modelo de predicción
-  (encoders) y la corrección (láser).
-- **Ganancia de Kalman** — comportamiento de *K(k)* a lo largo del tiempo;
-  valores altos indican mayor confianza en la medición, valores bajos indican
-  mayor confianza en la predicción.
 
 
 ## 5. **Estimación del avance mediante encoders**
@@ -172,9 +159,7 @@ monitoreo, pero no participan directamente en la decisión de navegación.
 
 ## 9. Resultados en los escenarios de prueba
 
-Los gráficos comparativos se generan con `comparacion_escenarios.py`,
-que toma `registro_simple.csv` y `registro.csv` como entradas y produce
-cuatro figuras lado a lado.
+Los gráficos comparativos se generaron utilizando los datos en `registro_simple.csv` y `registro.csv` como entradas y se obtuvieron cuatro figuras lado a lado.
 
 ---
 
